@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Register Scanner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dr. Sahaja Reddy Clinic Register Scanner</h1>
+            <div class="date-picker">
+                <label for="visitDate">Visit Date:</label>
+                <input type="date" id="visitDate">
+            </div>
+        </header>
+        
+        <div class="input-section">
+            <div class="input-buttons">
+                <button id="takePhotoBtn">Take Photo</button>
+                <input type="file" id="fileInput" accept="image/*">
+                <label for="fileInput" class="upload-btn">Upload Image</label>
+            </div>
+            <div class="preview-section">
+                <img id="imagePreview" src="" alt="Preview" style="display: none;">
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="extracted">Extracted Records</button>
+            <button class="tab-btn" data-tab="saved">Saved Records</button>
+        </div>
+
+        <div class="summary-section" style="display: none;">
+            <div class="summary-card">
+                <div class="summary-item">
+                    <h3>Total Patients</h3>
+                    <span id="totalPatients">0</span>
+                </div>
+                <div class="summary-item">
+                    <h3>Total Amount</h3>
+                    <span id="totalAmount">₹0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="extracted-tab" class="tab-content active">
+            <h2>Extracted Records</h2>
+            <div id="loading" style="display: none;">Analyzing image...</div>
+            <div class="table-container">
+                <table id="recordsTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Clinic ID</th>
+                            <th>Patient Name</th>
+                            <th>Age/Sex</th>
+                            <th>Phone</th>
+                            <th>Location</th>
+                            <th>Visit Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="extractedContacts"></tbody>
+                </table>
+            </div>
+            <div class="action-buttons">
+                <button id="saveAllBtn" class="btn-primary" style="display: none;">Save All Records</button>
+                <button id="editModeBtn" class="btn-secondary" style="display: none;">Edit Mode</button>
+            </div>
+        </div>
+
+        <div id="saved-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Saved Records</h2>
+                <button id="addNewRecordBtn" class="btn-primary">Add New Record</button>
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search records...">
+                <select id="searchField">
+                    <option value="all">All Fields</option>
+                    <option value="clinic_id">Clinic ID</option>
+                    <option value="patient_name">Patient Name</option>
+                    <option value="phone_number">Phone</option>
+                    <option value="location">Location</option>
+                    <option value="visit_date">Visit Date</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table id="savedRecordsTable">
+                    <thead>
+                        <tr>
+                            <th>Clinic ID</th>
+                            <th>Patient Name</th>
+                            <th>Age/Sex</th>
+                            <th>Phone</th>
+                            <th>Location</th>
+                            <th>Visit Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="savedRecords"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add/Edit Record Modal -->
+        <div id="recordModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle">Add New Record</h2>
+                <form id="recordForm">
+                    <input type="hidden" id="recordId">
+                    <div class="form-group">
+                        <label for="clinicId">Clinic ID</label>
+                        <input type="text" id="clinicId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientName">Patient Name</label>
+                        <input type="text" id="patientName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ageSex">Age/Sex</label>
+                        <input type="text" id="ageSex" placeholder="e.g., 45/M">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="text" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location">
+                    </div>
+                    <div class="form-group">
+                        <label for="visitDate">Visit Date</label>
+                        <input type="date" id="modalVisitDate">
+                    </div>
+                    <button type="submit" class="btn-primary">Save Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 
