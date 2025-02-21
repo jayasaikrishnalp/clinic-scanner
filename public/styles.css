@@ -4,40 +4,68 @@
     box-sizing: border-box;
 }
 
+/* Mobile-first styles */
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f5f7fa;
     color: #2d3748;
     line-height: 1.6;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .container {
-    max-width: 1200px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px;
 }
 
 header {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
+    gap: 10px;
 }
 
 h1 {
-    font-size: 2.2em;
+    font-size: 1.5em;
     color: #2d3748;
     font-weight: 600;
+    text-align: center;
+}
+
+/* Mobile-specific styles */
+.mobile-header {
+    font-size: 1.2em;
+    padding: 10px 0;
+}
+
+.mobile-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mobile-buttons button,
+.mobile-buttons .upload-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
 }
 
 .date-picker {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 10px;
+    width: 100%;
 }
 
 .date-picker input {
-    padding: 8px;
+    padding: 12px;
+    width: 100%;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     font-size: 14px;
@@ -174,7 +202,8 @@ button:hover, .upload-btn:hover {
 
 .table-container {
     overflow-x: auto;
-    margin: 20px 0;
+    -webkit-overflow-scrolling: touch;
+    margin: 10px 0;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
@@ -182,6 +211,7 @@ button:hover, .upload-btn:hover {
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 800px;
 }
 
 th, td {
@@ -254,11 +284,13 @@ tr:hover {
 
 .search-bar {
     display: flex;
+    flex-direction: column;
     gap: 15px;
     margin-bottom: 20px;
 }
 
 .search-bar input, .search-bar select {
+    width: 100%;
     padding: 10px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
@@ -283,12 +315,14 @@ tr:hover {
 
 .modal-content {
     background-color: white;
-    margin: 10% auto;
+    margin: 5% auto;
     padding: 30px;
     border-radius: 12px;
-    width: 90%;
+    width: 95%;
     max-width: 600px;
     position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .close {
@@ -342,19 +376,21 @@ tr:hover {
 .tabs {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin: 10px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .tab-btn {
-    padding: 12px 24px;
+    padding: 10px 15px;
     background-color: #e2e8f0;
     color: #4a5568;
     border: none;
     border-radius: 8px 8px 0 0;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
-    transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
 .tab-btn.active {
@@ -372,4 +408,43 @@ tr:hover {
 
 .tab-content.active {
     display: block;
+}
+
+/* Desktop styles */
+@media (min-width: 768px) {
+    .container {
+        max-width: 1200px;
+        padding: 20px;
+    }
+
+    header {
+        flex-direction: row;
+        margin-bottom: 30px;
+    }
+
+    h1 {
+        font-size: 2.2em;
+    }
+
+    .mobile-buttons {
+        flex-direction: row;
+    }
+
+    .date-picker {
+        flex-direction: row;
+        width: auto;
+    }
+
+    .date-picker input {
+        width: auto;
+    }
+
+    .search-bar {
+        flex-direction: row;
+    }
+
+    .modal-content {
+        margin: 10% auto;
+        width: 90%;
+    }
 } 

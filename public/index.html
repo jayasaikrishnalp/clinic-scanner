@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Clinic Register Scanner</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -10,7 +12,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Dr. Sahaja Reddy Clinic Register Scanner</h1>
+            <h1 class="mobile-header">Dr. Sahaja Reddy Clinic</h1>
             <div class="date-picker">
                 <label for="visitDate">Visit Date:</label>
                 <input type="date" id="visitDate">
@@ -18,9 +20,9 @@
         </header>
         
         <div class="input-section">
-            <div class="input-buttons">
+            <div class="input-buttons mobile-buttons">
                 <button id="takePhotoBtn">Take Photo</button>
-                <input type="file" id="fileInput" accept="image/*">
+                <input type="file" id="fileInput" accept="image/*" capture="environment">
                 <label for="fileInput" class="upload-btn">Upload Image</label>
             </div>
             <div class="preview-section">

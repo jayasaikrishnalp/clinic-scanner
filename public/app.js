@@ -446,4 +446,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize the page
     loadSavedRecords();
+
+    // Check if device is mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    // Handle mobile camera
+    if (isMobile) {
+        const fileInput = document.getElementById('fileInput');
+        fileInput.setAttribute('capture', 'environment');
+        
+        // Add touch feedback
+        const buttons = document.querySelectorAll('button, .upload-btn');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', () => {
+                button.style.opacity = '0.7';
+            });
+            button.addEventListener('touchend', () => {
+                button.style.opacity = '1';
+            });
+        });
+    }
+
+    // Handle table scrolling on mobile
+    const tables = document.querySelectorAll('.table-container');
+    tables.forEach(table => {
+        let isScrolling = false;
+        let startX;
+        let scrollLeft;
+
+        table.addEventListener('touchstart', (e) => {
+            isScrolling = true;
+            startX = e.touches[0].pageX - table.offsetLeft;
+            scrollLeft = table.scrollLeft;
+        });
+
+        table.addEventListener('touchmove', (e) => {
+            if (!isScrolling) return;
+            e.preventDefault();
+            const x = e.touches[0].pageX - table.offsetLeft;
+            const walk = (x - startX) * 2;
+            table.scrollLeft = scrollLeft - walk;
+        });
+
+        table.addEventListener('touchend', () => {
+            isScrolling = false;
+        });
+    });
 }); 
