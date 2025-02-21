@@ -445,8 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
         visitChart.update();
     }
 
-    // Load saved records when the page loads
-    async function loadSavedRecords(searchTerm = '', searchField = 'all') {
+    // Make loadSavedRecords globally available
+    window.loadSavedRecords = async function(searchTerm = '', searchField = 'all') {
         try {
             const response = await fetch(`/api/contacts?search=${searchTerm}&field=${searchField}`);
             console.log('Loading saved records...');
@@ -471,8 +471,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${record.location || ''}</td>
                     <td>${visitDate}</td>
                     <td>
-                        <button class="action-btn edit-btn" onclick="editRecord(${record.id})">Edit</button>
-                        <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})">Delete</button>
+                        <button class="action-btn edit-btn" onclick="window.editRecord(${record.id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="window.deleteRecord(${record.id})">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error loading records:', error);
             alert('Error loading records');
         }
-    }
+    };
 
     // Modal management
     const modal = document.getElementById('recordModal');
@@ -539,8 +539,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Edit record
-    async function editRecord(id) {
+    // Make these functions global
+    window.editRecord = async function(id) {
         try {
             const response = await fetch(`/api/contacts/${id}`);
             const record = await response.json();
@@ -552,13 +552,36 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('ageSex').value = record.age_sex || '';
             document.getElementById('phone').value = record.phone_number || '';
             document.getElementById('location').value = record.location || '';
+            document.getElementById('modalVisitDate').value = record.visit_date || '';
             
-            modal.style.display = 'block';
+            document.getElementById('recordModal').style.display = 'block';
         } catch (error) {
             console.error('Error loading record:', error);
             alert('Error loading record');
         }
-    }
+    };
+
+    window.deleteRecord = async function(id) {
+        if (!confirm('Are you sure you want to delete this record?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/contacts/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete record');
+            }
+
+            // Refresh the records list
+            loadSavedRecords();
+        } catch (error) {
+            console.error('Error deleting record:', error);
+            alert('Error deleting record');
+        }
+    };
 
     // Search functionality
     const searchInput = document.getElementById('searchInput');
