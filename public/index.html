@@ -8,6 +8,7 @@
     <title>Clinic Register Scanner</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -78,33 +79,52 @@
                 <button id="addNewRecordBtn" class="btn-primary">Add New Record</button>
             </div>
             
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search records...">
-                <select id="searchField">
-                    <option value="all">All Fields</option>
-                    <option value="clinic_id">Clinic ID</option>
-                    <option value="patient_name">Patient Name</option>
-                    <option value="phone_number">Phone</option>
-                    <option value="location">Location</option>
-                    <option value="visit_date">Visit Date</option>
-                </select>
-            </div>
+            <div class="dashboard-container">
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Gender Distribution</h3>
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Age Groups</h3>
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Daily Patient Count</h3>
+                        <canvas id="visitChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="data-container">
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Search records...">
+                        <select id="searchField">
+                            <option value="all">All Fields</option>
+                            <option value="clinic_id">Clinic ID</option>
+                            <option value="patient_name">Patient Name</option>
+                            <option value="phone_number">Phone</option>
+                            <option value="location">Location</option>
+                            <option value="visit_date">Visit Date</option>
+                        </select>
+                    </div>
 
-            <div class="table-container">
-                <table id="savedRecordsTable">
-                    <thead>
-                        <tr>
-                            <th>Clinic ID</th>
-                            <th>Patient Name</th>
-                            <th>Age/Sex</th>
-                            <th>Phone</th>
-                            <th>Location</th>
-                            <th>Visit Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="savedRecords"></tbody>
-                </table>
+                    <div class="table-container">
+                        <table id="savedRecordsTable">
+                            <thead>
+                                <tr>
+                                    <th>Clinic ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Age/Sex</th>
+                                    <th>Phone</th>
+                                    <th>Location</th>
+                                    <th>Visit Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="savedRecords"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 

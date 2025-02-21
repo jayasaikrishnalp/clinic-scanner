@@ -319,6 +319,132 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Initialize charts
+    let genderChart, ageChart, visitChart;
+    
+    function initializeCharts() {
+        // Gender Distribution Chart
+        const genderCtx = document.getElementById('genderChart').getContext('2d');
+        genderChart = new Chart(genderCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Male', 'Female'],
+                datasets: [{
+                    data: [0, 0],
+                    backgroundColor: ['#4299E1', '#ED64A6']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Age Groups Chart
+        const ageCtx = document.getElementById('ageChart').getContext('2d');
+        ageChart = new Chart(ageCtx, {
+            type: 'pie',
+            data: {
+                labels: ['0-18', '19-30', '31-50', '51+'],
+                datasets: [{
+                    data: [0, 0, 0, 0],
+                    backgroundColor: ['#48BB78', '#4299E1', '#ED64A6', '#ECC94B']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Daily Visits Chart
+        const visitCtx = document.getElementById('visitChart').getContext('2d');
+        visitChart = new Chart(visitCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: '#4299E1',
+                    label: 'Number of Patients'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateCharts(records) {
+        // Gender Distribution
+        const genderData = {male: 0, female: 0};
+        records.forEach(record => {
+            const gender = record.age_sex?.toLowerCase().includes('m') ? 'male' : 'female';
+            genderData[gender]++;
+        });
+        genderChart.data.datasets[0].data = [genderData.male, genderData.female];
+        genderChart.update();
+
+        // Age Groups
+        const ageData = {
+            '0-18': 0,
+            '19-30': 0,
+            '31-50': 0,
+            '51+': 0
+        };
+        records.forEach(record => {
+            const age = parseInt(record.age_sex);
+            if (age <= 18) ageData['0-18']++;
+            else if (age <= 30) ageData['19-30']++;
+            else if (age <= 50) ageData['31-50']++;
+            else ageData['51+']++;
+        });
+        ageChart.data.datasets[0].data = Object.values(ageData);
+        ageChart.update();
+
+        // Daily Visits
+        const visitData = {};
+        records.forEach(record => {
+            const date = new Date(record.visit_date).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short'
+            });
+            visitData[date] = (visitData[date] || 0) + 1;
+        });
+        
+        visitChart.data.labels = Object.keys(visitData);
+        visitChart.data.datasets[0].data = Object.values(visitData);
+        visitChart.update();
+    }
+
     // Load saved records when the page loads
     async function loadSavedRecords(searchTerm = '', searchField = 'all') {
         try {
@@ -329,6 +455,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tbody = document.getElementById('savedRecords');
             tbody.innerHTML = '';
+            
+            // Update charts with new data
+            updateCharts(records);
             
             records.forEach(record => {
                 const row = document.createElement('tr');
@@ -492,4 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isScrolling = false;
         });
     });
+
+    // Initialize charts
+    initializeCharts();
 }); 
