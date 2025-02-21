@@ -520,4 +520,47 @@ tr:hover {
     .data-container {
         flex-grow: 1;
     }
+}
+
+/* Pagination styles */
+.pagination {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #4299e1;
+    color: white;
+}
+
+.pagination-btn.active {
+    background: #4299e1;
+    color: white;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Sortable headers */
+th[data-sort] {
+    cursor: pointer;
+    position: relative;
+}
+
+th[data-sort]:hover {
+    background-color: #f7fafc;
 } 

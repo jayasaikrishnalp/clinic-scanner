@@ -5,14 +5,58 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 
+// Backup directory
+const BACKUP_DIR = path.join(__dirname, 'backups');
+if (!fs.existsSync(BACKUP_DIR)) {
+    fs.mkdirSync(BACKUP_DIR);
+}
+
+// Backup database every 24 hours
+function backupDatabase() {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupPath = path.join(BACKUP_DIR, `contacts-${timestamp}.db`);
+    
+    try {
+        // Create a backup
+        fs.copyFileSync(path.join(__dirname, 'contacts.db'), backupPath);
+        
+        // Keep only last 7 backups
+        const files = fs.readdirSync(BACKUP_DIR);
+        if (files.length > 7) {
+            const oldestFile = files.sort()[0];
+            fs.unlinkSync(path.join(BACKUP_DIR, oldestFile));
+        }
+        
+        console.log(`Database backed up to ${backupPath}`);
+    } catch (error) {
+        console.error('Backup failed:', error);
+    }
+}
+
+// Schedule backup
+setInterval(backupDatabase, 24 * 60 * 60 * 1000); // Every 24 hours
+// Initial backup
+backupDatabase();
+
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
 // Initialize database
 const db = new Database(path.join(__dirname, 'contacts.db'));
-// Force recreation of tables
-db.exec('DROP TABLE IF EXISTS contacts');
-db.exec(fs.readFileSync('schema.sql', 'utf8'));
+
+// Create tables if they don't exist (instead of dropping and recreating)
+db.exec(`
+    CREATE TABLE IF NOT EXISTS contacts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        clinic_id TEXT,
+        patient_name TEXT,
+        age_sex TEXT,
+        phone_number TEXT,
+        location TEXT,
+        visit_date TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+`);
 
 // Initialize Anthropic client
 const anthropic = new Anthropic({
@@ -73,15 +117,18 @@ app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
 app.post('/api/contacts', (req, res) => {
     try {
         const { clinic_id, patient_name, age_sex, phone_number, location, visit_date } = req.body;
-        console.log('Saving contact:', { clinic_id, patient_name, age_sex, phone_number, location });
+        // Validate required fields
+        if (!clinic_id || !patient_name) {
+            return res.status(400).json({ error: 'Clinic ID and Patient Name are required' });
+        }
+
         const stmt = db.prepare(
             'INSERT INTO contacts (clinic_id, patient_name, age_sex, phone_number, location, visit_date) VALUES (?, ?, ?, ?, ?, ?)'
         );
         const result = stmt.run(clinic_id, patient_name, age_sex, phone_number, location, visit_date);
-        console.log('Saved with ID:', result.lastInsertRowid);
         res.json({ id: result.lastInsertRowid });
     } catch (error) {
-        console.error('Error saving contact:', error);
+        console.error('Database error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -90,8 +137,17 @@ app.get('/api/contacts', (req, res) => {
     try {
         const searchTerm = req.query.search || '';
         const searchField = req.query.field || 'all';
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 100;
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortOrder = req.query.sortOrder || 'DESC';
         
-        console.log('Fetching contacts. Search:', searchTerm, 'Field:', searchField);
+        // Validate sort field to prevent SQL injection
+        const allowedSortFields = ['clinic_id', 'patient_name', 'age_sex', 'phone_number', 'location', 'visit_date', 'created_at'];
+        if (!allowedSortFields.includes(sortBy)) {
+            return res.status(400).json({ error: 'Invalid sort field' });
+        }
+        
         let query = 'SELECT * FROM contacts';
         let params = [];
         
@@ -105,11 +161,31 @@ app.get('/api/contacts', (req, res) => {
             }
         }
         
-        query += ' ORDER BY created_at DESC';
+        query += ` ORDER BY ${sortBy} ${sortOrder}`;
+        query += ` LIMIT ? OFFSET ?`;
+        params.push(limit, (page - 1) * limit);
+        
+        // Get total count for pagination
+        let countQuery = 'SELECT COUNT(*) as total FROM contacts';
+        if (searchTerm) {
+            if (searchField === 'all') {
+                countQuery += ` WHERE clinic_id LIKE ? OR patient_name LIKE ? OR phone_number LIKE ? OR location LIKE ?`;
+            } else {
+                countQuery += ` WHERE ${searchField} LIKE ?`;
+            }
+        }
+        const totalCount = db.prepare(countQuery).get(...params.slice(0, -2)).total;
         
         const contacts = db.prepare(query).all(...params);
         console.log('Found contacts:', contacts.length);
-        res.json(contacts);
+        res.json({
+            contacts,
+            pagination: {
+                total: totalCount,
+                pages: Math.ceil(totalCount / limit),
+                currentPage: page
+            }
+        });
     } catch (error) {
         console.error('Error fetching contacts:', error);
         res.status(500).json({ error: error.message });

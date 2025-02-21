@@ -445,12 +445,19 @@ document.addEventListener('DOMContentLoaded', () => {
         visitChart.update();
     }
 
+    let currentPage = 1;
+    let currentSort = { field: 'created_at', order: 'DESC' };
+
     // Make loadSavedRecords globally available
-    window.loadSavedRecords = async function(searchTerm = '', searchField = 'all') {
+    window.loadSavedRecords = async function(searchTerm = '', searchField = 'all', page = currentPage) {
         try {
-            const response = await fetch(`/api/contacts?search=${searchTerm}&field=${searchField}`);
+            const response = await fetch(
+                `/api/contacts?search=${searchTerm}&field=${searchField}` +
+                `&page=${page}&sortBy=${currentSort.field}&sortOrder=${currentSort.order}`
+            );
             console.log('Loading saved records...');
-            const records = await response.json();
+            const data = await response.json();
+            const records = data.contacts;
             console.log('Received records:', records);
             
             const tbody = document.getElementById('savedRecords');
@@ -458,6 +465,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Update charts with new data
             updateCharts(records);
+            
+            // Update pagination
+            updatePagination(data.pagination);
             
             records.forEach(record => {
                 const row = document.createElement('tr');
@@ -482,6 +492,66 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Error loading records');
         }
     };
+
+    function updatePagination(pagination) {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = '';
+        
+        // Previous button
+        const prevButton = document.createElement('button');
+        prevButton.textContent = '← Previous';
+        prevButton.className = 'pagination-btn';
+        prevButton.disabled = pagination.currentPage === 1;
+        prevButton.onclick = () => loadSavedRecords(
+            document.getElementById('searchInput').value,
+            document.getElementById('searchField').value,
+            pagination.currentPage - 1
+        );
+        paginationContainer.appendChild(prevButton);
+        
+        // Page numbers
+        for (let i = 1; i <= pagination.pages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i;
+            pageButton.className = `pagination-btn ${i === pagination.currentPage ? 'active' : ''}`;
+            pageButton.onclick = () => loadSavedRecords(
+                document.getElementById('searchInput').value,
+                document.getElementById('searchField').value,
+                i
+            );
+            paginationContainer.appendChild(pageButton);
+        }
+        
+        // Next button
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next →';
+        nextButton.className = 'pagination-btn';
+        nextButton.disabled = pagination.currentPage === pagination.pages;
+        nextButton.onclick = () => loadSavedRecords(
+            document.getElementById('searchInput').value,
+            document.getElementById('searchField').value,
+            pagination.currentPage + 1
+        );
+        paginationContainer.appendChild(nextButton);
+    }
+
+    // Add sorting functionality
+    function initializeSorting() {
+        const headers = document.querySelectorAll('#savedRecordsTable th[data-sort]');
+        headers.forEach(header => {
+            header.style.cursor = 'pointer';
+            header.onclick = () => {
+                const field = header.dataset.sort;
+                currentSort.order = currentSort.field === field && currentSort.order === 'ASC' ? 'DESC' : 'ASC';
+                currentSort.field = field;
+                loadSavedRecords(
+                    document.getElementById('searchInput').value,
+                    document.getElementById('searchField').value,
+                    1
+                );
+            };
+        });
+    }
 
     // Modal management
     const modal = document.getElementById('recordModal');
